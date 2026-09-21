@@ -329,7 +329,7 @@ window.addEventListener('keydown', (e) => {
   if (meta) return;
 
   const k = e.key.toLowerCase();
-  const map = { p: 'pen', b: 'pen', l: 'line', r: 'rect', c: 'circle', e: 'eraser' };
+  const map = { p: 'pen', b: 'pen', l: 'line', r: 'rect', c: 'circle', a: 'arrow', e: 'eraser' };
 
   if (e.key === 'Escape') { closeOverview(); closePops(null); return; }
   if (e.key === 'Tab') { e.preventDefault(); overview.classList.contains('hidden') ? openOverview() : closeOverview(); return; }

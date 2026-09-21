@@ -211,7 +211,7 @@ export function applyStyle(c) {
 function constrain(a, b) {
   if (!state.shift) return b;
   const dx = b.x - a.x, dy = b.y - a.y;
-  if (state.tool === 'line') {
+  if (state.tool === 'line' || state.tool === 'arrow') {
     const ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
     const len = Math.hypot(dx, dy);
     return { x: a.x + Math.cos(ang) * len, y: a.y + Math.sin(ang) * len };
@@ -233,6 +233,18 @@ export function drawShape(c, a, bRaw) {
     c.stroke();
   } else if (state.tool === 'circle') {
     c.ellipse((a.x + b.x) / 2, (a.y + b.y) / 2, Math.abs(b.x - a.x) / 2, Math.abs(b.y - a.y) / 2, 0, 0, Math.PI * 2);
+    c.stroke();
+  } else if (state.tool === 'arrow') {
+    const ang = Math.atan2(b.y - a.y, b.x - a.x);
+    const head = Math.max(10, state.size * 2.5);
+    c.moveTo(a.x, a.y);
+    c.lineTo(b.x, b.y);
+    c.stroke();
+    c.beginPath();
+    c.moveTo(b.x, b.y);
+    c.lineTo(b.x - head * Math.cos(ang - Math.PI / 6), b.y - head * Math.sin(ang - Math.PI / 6));
+    c.moveTo(b.x, b.y);
+    c.lineTo(b.x - head * Math.cos(ang + Math.PI / 6), b.y - head * Math.sin(ang + Math.PI / 6));
     c.stroke();
   }
   c.globalAlpha = 1;
