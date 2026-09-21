@@ -12,7 +12,6 @@ window.onunhandledrejection=function(e){window.parent.postMessage({type:'app-err
 window.addEventListener('error',function(e){var t=e&&e.target;if(t&&t!==window&&t.tagName==='SCRIPT'){var u=t.src||'';window.parent.postMessage({type:'app-error',message:'Failed to load script'+(u?': '+u:' (inline module)'),source:u},'*');}},true);
 (function(){var _f=window.fetch;window.fetch=function(){var a=arguments,u=typeof a[0]==='string'?a[0]:(a[0]&&a[0].url)||'';var p=_f.apply(this,a);p.then(function(r){if(r.status===500){r.clone().text().then(function(b){window.parent.postMessage({type:'fetch-error',url:u,status:500,body:b},'*');}).catch(function(){window.parent.postMessage({type:'fetch-error',url:u,status:500,body:''},'*');});}}).catch(function(e){window.parent.postMessage({type:'fetch-error',url:u,status:0,body:e.message||'fetch failed'},'*');});return p;};})();
 </script>
-<script src="https://builder.puter.com/runtime.js" defer></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
@@ -130,6 +129,9 @@ window.addEventListener('error',function(e){var t=e&&e.target;if(t&&t!==window&&
 
 <!-- ============================ FOOTER ============================ -->
 <footer id="foot">وقف لله تعالى</footer>
+
+<!-- ============================ WAQF BADGE ============================ -->
+<div id="waqfBadge" role="note" aria-label="Waqf">Waqf</div>
 
 <script type="module" src="js/app.js"></script>
 </body>
