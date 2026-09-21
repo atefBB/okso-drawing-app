@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>okso. — think on paper</title>
+<meta name="description" content="A minimal sketching app for thinking on paper: pen, shapes, eraser, pages and instant export.">
+<meta name="theme-color" content="#111111">
+<script>
+window.onerror=function(msg,src,line,col,err){window.parent.postMessage({type:'app-error',message:msg,source:src,lineno:line,colno:col,stack:err&&err.stack||''},'*');};
+window.onunhandledrejection=function(e){window.parent.postMessage({type:'app-error',message:'Unhandled promise rejection: '+(e.reason&&e.reason.message||e.reason||'unknown'),stack:e.reason&&e.reason.stack||''},'*');};
+window.addEventListener('error',function(e){var t=e&&e.target;if(t&&t!==window&&t.tagName==='SCRIPT'){var u=t.src||'';window.parent.postMessage({type:'app-error',message:'Failed to load script'+(u?': '+u:' (inline module)'),source:u},'*');}},true);
+(function(){var _f=window.fetch;window.fetch=function(){var a=arguments,u=typeof a[0]==='string'?a[0]:(a[0]&&a[0].url)||'';var p=_f.apply(this,a);p.then(function(r){if(r.status===500){r.clone().text().then(function(b){window.parent.postMessage({type:'fetch-error',url:u,status:500,body:b},'*');}).catch(function(){window.parent.postMessage({type:'fetch-error',url:u,status:500,body:''},'*');});}}).catch(function(e){window.parent.postMessage({type:'fetch-error',url:u,status:0,body:e.message||'fetch failed'},'*');});return p;};})();
+</script>
+<script src="https://builder.puter.com/runtime.js" defer></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+    <!-- puter-pwa: generated, do not edit -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="okso.">
+    <!-- /puter-pwa -->
+</head>
+<body>
+
+<!-- ============================ CANVAS ============================ -->
+<div id="stage">
+  <canvas id="board"></canvas>
+  <canvas id="overlay"></canvas>
+</div>
+<div id="cursor" aria-hidden="true"></div>
+
+<!-- ============================ TOP BAR ============================ -->
+<header id="topbar">
+  <div class="brand">okso<span>.</span></div>
+
+  <div class="pager">
+    <button id="prevPage" class="ghost" title="Previous page (←)"><i data-lucide="chevron-left"></i></button>
+    <button id="openOverview" class="pagecount" title="All pages (Tab)"><span id="pageNum">01</span><em>/</em><span id="pageTotal">01</span></button>
+    <button id="nextPage" class="ghost" title="Next page (→)"><i data-lucide="chevron-right"></i></button>
+  </div>
+
+  <div class="top-actions">
+    <button id="newPage" class="ghost" title="New page (N)"><i data-lucide="plus"></i></button>
+    <button id="openOverview2" class="ghost" title="All pages (Tab)"><i data-lucide="layout-grid"></i></button>
+    <button id="exportBtn" class="ghost" title="Export (S)"><i data-lucide="arrow-down-to-line"></i></button>
+  </div>
+</header>
+
+<!-- ============================ TOOLBAR ============================ -->
+<div id="toolbar">
+  <div class="group">
+    <button id="undoBtn" class="tool" title="Undo (⌘Z)"><i data-lucide="undo-2"></i></button>
+    <button id="redoBtn" class="tool" title="Redo (⇧⌘Z)"><i data-lucide="redo-2"></i></button>
+  </div>
+
+  <span class="sep"></span>
+
+  <div class="group">
+    <button class="tool" data-tool="pen" title="Pen (P)"><i data-lucide="pen-line"></i></button>
+    <button class="tool" data-tool="line" title="Line (L)"><i data-lucide="minus"></i></button>
+    <button class="tool" data-tool="rect" title="Rectangle (R)"><i data-lucide="square"></i></button>
+    <button class="tool" data-tool="circle" title="Circle (C)"><i data-lucide="circle"></i></button>
+    <button class="tool" data-tool="eraser" title="Eraser (E)"><i data-lucide="eraser"></i></button>
+  </div>
+
+  <span class="sep"></span>
+
+  <div class="group">
+    <button id="sizeBtn" class="tool wide" title="Stroke width ([ / ])">
+      <span id="sizeDot" class="dot-preview"></span>
+    </button>
+    <button id="colorBtn" class="tool wide" title="Ink">
+      <span id="colorDot" class="ink-preview"></span>
+    </button>
+  </div>
+
+  <span class="sep"></span>
+
+  <div class="group">
+    <button id="clearBtn" class="tool" title="Clear page (⌫)"><i data-lucide="eraser" style="display:none"></i><i data-lucide="trash-2"></i></button>
+  </div>
+
+  <!-- size popover -->
+  <div id="sizePop" class="pop">
+    <div class="pop-row" id="sizeRow"></div>
+    <input id="sizeRange" class="range" type="range" min="1" max="60" value="4">
+    <div class="pop-label"><span id="sizeVal">4</span> px</div>
+  </div>
+
+  <!-- color popover -->
+  <div id="colorPop" class="pop">
+    <div class="pop-row" id="colorRow"></div>
+    <div class="pop-foot">
+      <label class="custom-color">
+        <input id="colorInput" type="color" value="#111111">
+        <i data-lucide="pipette"></i>
+        <span>Custom</span>
+      </label>
+      <div class="opacity">
+        <span>Opacity</span>
+        <input id="opacityRange" class="range" type="range" min="10" max="100" value="100">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ OVERVIEW ============================ -->
+<section id="overview" class="hidden">
+  <div class="ov-head">
+    <div>
+      <h2>Pages</h2>
+      <p id="ovCount">1 page</p>
+    </div>
+    <div class="ov-actions">
+      <button id="ovNew" class="btn-outline"><i data-lucide="plus"></i> New page</button>
+      <button id="ovExportAll" class="btn-outline"><i data-lucide="images"></i> Export all</button>
+      <button id="ovClose" class="ghost" title="Close (Esc)"><i data-lucide="x"></i></button>
+    </div>
+  </div>
+  <div id="ovGrid" class="ov-grid"></div>
+</section>
+
+<!-- ============================ TOAST ============================ -->
+<div id="toast"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
